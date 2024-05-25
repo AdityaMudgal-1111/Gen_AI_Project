@@ -53,57 +53,8 @@ quiz_evaluation_prompt=PromptTemplate(input_variables=["subject", "quiz"], templ
 
 review_chain=LLMChain(llm=llm, prompt=quiz_evaluation_prompt, output_key="review", verbose=True)
 
-generate_evaluate_chain=SequentialChain(chains=[quiz_chain, review_chain], input_variables=["text", "number", \ "subject", "tone", "RESPONSE_JSON"],output_variables=["quiz", "review"], verbose=True,)
+generate_evaluate_chain=SequentialChain(chains=[quiz_chain, review_chain], input_variables=["text", "number",  "subject", "tone", "RESPONSE_JSON"],output_variables=["quiz", "review"], verbose=True,)
 
-with open('./data.txt', 'r') as file:
-    TEXT = file.read()
-print(TEXT)
-
-TEXT
-NUMBER=5 
-SUBJECT="biology"
-TONE="simple"
-RESPONSE_JSON = json.dumps(RESPONSE_JSON)
-
-#https://python.langchain.com/docs/modules/model_io/llms/token_usage_tracking
-
-#How to setup Token Usage Tracking in LangChain
-with get_openai_callback() as cb:
-    response=generate_evaluate_chain(
-        {
-            "text": TEXT,
-            "number": NUMBER,
-            "subject":SUBJECT,
-            "tone": TONE,
-            "RESPONSE_JSON": json.dumps(RESPONSE_JSON)
-        }
-        )
-print(response)
-
-print(f"Total Tokens:{cb.total_tokens}")
-print(f"Prompt Tokens:{cb.prompt_tokens}")
-print(f"Completion Tokens:{cb.completion_tokens}")
-print(f"Total Cost:{cb.total_cost}")
-
-quiz=response.get("quiz")
-quiz=json.loads(quiz)
-
-quiz_table_data = []
-for key, value in quiz.items():
-    mcq = value["mcq"]
-    options = " | ".join(
-        [
-            f"{option}: {option_value}"
-            for option, option_value in value["options"].items()
-            ]
-        )
-    correct = value["correct"]
-    quiz_table_data.append({"MCQ": mcq, "Choices": options, "Correct": correct})
-
-print(quiz_table_data)
-
-quiz=pd.DataFrame(quiz_table_data)
-quiz.to_csv("machinelearning.csv",index=False)
 
 
 
